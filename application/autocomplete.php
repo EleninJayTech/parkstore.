@@ -91,6 +91,7 @@
  * @property CI_Session               $session
 
  * @property NaverSearchAdApi               $naversearchadapi
+ * @property Product_m                 $Product_m
  */
 class CI_Controller extends H_Models{
 	public function __construct(){}
@@ -209,7 +210,7 @@ class CI_DB extends CI_DB_query_builder{};
  * @property CI_Cache                 $cache
  * @property CI_Session               $session
  *
- * @property Your_lib                 $your_lib
+ * @property Product_m                 $product_m
  */
 class CI_Model{};
 //class H_Model extends CI_Model{};
