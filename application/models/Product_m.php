@@ -21,8 +21,6 @@ class Product_m extends MY_Model {
 		$product_id = $this->db->get('product')->row('product_id');
 
 		$set = [
-			'shop_code'=>$saveData['shop_code'],
-			'product_no'=>$saveData['product_no'],
 			'product_link'=>$saveData['product_link'],
 			'product_name'=>$saveData['product_name'],
 			'product_info'=>$saveData['product_info'],
@@ -32,6 +30,8 @@ class Product_m extends MY_Model {
 
 		if( empty($product_id) ){
 			$set['reg_date'] = time();
+			$set['shop_code'] = $saveData['shop_code'];
+			$set['product_no'] = $saveData['product_no'];
 			$this->db->insert('product', $set);
 			$product_id = $this->db->insert_id();
 		} else {
