@@ -36,6 +36,10 @@ class Product_m extends MY_Model {
 			$product_id = $this->db->insert_id();
 		} else {
 			$set['mod_date'] = time();
+			$this->db->where([
+				'shop_code'=>$saveData['shop_code'],
+				'product_no'=>$saveData['product_no'],
+			]);
 			$this->db->update('product', $set);
 		}
 
