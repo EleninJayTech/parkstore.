@@ -31,6 +31,8 @@ class Api extends MY_Controller {
 			$product_info = $product['product_info']; // 상품 정보 전체 텍스트
 			$product_info_html = $product['product_info_html']; // 상품 정보 전체 HTML
 			$product_detail_info_html = $product['product_detail_info_html']; // 상품 상세 정보 전체 HTML
+			$category_code = $product['category_code']; // 네이버 카테고리 코드
+			$cate_depth_text = $product['cate_depth_text']; // 네이버 카테고리 분류 텍스트
 
 			$product_info_list = $product['product_info_list']; // 상품 정보
 			$product_option_list = $product['product_option_list']; // 옵션 정보
@@ -47,6 +49,11 @@ class Api extends MY_Controller {
 				'product_info'=>$product_info,
 				'product_info_html'=>$product_info_html,
 				'product_detail_info_html'=>$product_detail_info_html,
+				'category_code'=>$category_code,
+				'category_depth_1'=>$cate_depth_text[0] ?? '',
+				'category_depth_2'=>$cate_depth_text[1] ?? '',
+				'category_depth_3'=>$cate_depth_text[2] ?? '',
+				'category_depth_4'=>$cate_depth_text[3] ?? '',
 			]);
 
 			if( empty($product_id) ){
