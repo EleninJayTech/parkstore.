@@ -16,7 +16,7 @@ class Product extends MY_Controller {
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
 
-		$rows = 1;
+		$rows = 2;
 		foreach ($productList as $val){
 			// 상품상태 (신상품,중고상품)'
 			$sheet->setCellValue('A' . $rows, '신상품');
@@ -46,6 +46,10 @@ class Product extends MY_Controller {
 			$sheet->setCellValue('I' . $rows, $val['I']);
 			// 상품 상세정보 (<img src="http://bshop.phinf.naver.net/aaa.jpg">)'
 			$productDetailHtml = $val['J'];
+			$productDetailHtml = str_replace('ec-data-src', 'ec-data-img', $productDetailHtml);
+			$productDetailHtml = str_replace('src=', 'ori-src=', $productDetailHtml);
+			$productDetailHtml = str_replace('ec-data-img="', 'src="http://choitemb2b.com', $productDetailHtml);
+			/*
 			preg_match_all('/ec-data-src\s*=\s*"(.+?)"/',$productDetailHtml,$matches);
 			$detailList = '';
 			foreach ($matches as $imgSrc){
@@ -56,10 +60,11 @@ class Product extends MY_Controller {
 					$detailList .= "<img src='{$link}'>";
 				}
 			}
-			$sheet->setCellValue('J' . $rows, $detailList);
+			*/
+			$sheet->setCellValue('J' . $rows, $productDetailHtml);
 
 			// 판매자 상품코드
-			$sheet->setCellValue('K' . $rows, "{$val['K']}");
+			$sheet->setCellValue('K' . $rows, "CHO_{$val['K']}");
 			// 판매자 바코드' (초이템)'
 			$sheet->setCellValue('L' . $rows, '초이템');
 			// 제조사'
@@ -78,7 +83,8 @@ class Product extends MY_Controller {
 			// 구매평 노출여부 (Y,N)'
 			$sheet->setCellValue('S' . $rows, 'Y');
 			// 원산지 코드 (9680)'
-			$sheet->setCellValue('T' . $rows, "{$val['T']}");
+//			$sheet->setCellValue('T' . $rows, "{$val['T']}");
+			$sheet->setCellValue('T' . $rows, "04");
 
 			// 수입사'
 //			$sheet->setCellValue('U' . $rows, $val['test']);
@@ -166,6 +172,7 @@ class Product extends MY_Controller {
 				$sheet->setCellValue('AY' . $rows, $optionListStr);
 				// 옵션값'
 				$option_value_str = implode("\n", $option_value_arr);
+				$option_value_str = str_replace('*', 'x', $option_value_str);
 				$sheet->setCellValue('AZ' . $rows, $option_value_str);
 				// 옵션가'
 				$option_price_str = implode("\n", $option_price_arr);
