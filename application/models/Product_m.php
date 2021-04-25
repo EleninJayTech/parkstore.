@@ -132,10 +132,49 @@ class Product_m extends MY_Model {
 	}
 
 	/**
-	 * @return CI_DB_result
+	 * @return CI_DB_result|bool|mixed|string
 	 */
 	public function getProductList(){
-		$sql = "SELECT * FROM product";
+		$sql = "
+			SELECT
+			    p.product_id
+			    , p.product_no
+			    , '신상품' as A
+			    , p.category_code AS B
+			    , p.product_name AS C
+			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '공급가' ) AS price_origin
+			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '최저 판매 준수가' ) AS D
+			    , (SELECT img_file_name FROM product_img AS pi WHERE pi.product_id = p.product_id ORDER BY seq ASC LIMIT 1) AS H
+			    , (SELECT GROUP_CONCAT(img_file_name) FROM product_img AS pi WHERE pi.product_id = p.product_id AND seq != 1 ORDER BY seq ASC) AS I
+			    , p.product_detail_info_html AS J
+			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '자체상품코드' ) AS K
+			    , (SELECT IF(pil.info_value = '국내', '00', '0200037') FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS T
+				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS origin_area
+				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '배송방법' ) AS X
+			FROM product AS p
+		";
+		return $this->db->query($sql);
+	}
+
+	/**
+	 * @param $product_id
+	 * @return CI_DB_result|bool|mixed|string
+	 */
+	public function getOptionList($product_id){
+		if( empty($product_id) ){
+			return false;
+		}
+
+		$sql = "
+			SELECT o.option_name
+			    , GROUP_CONCAT(o.option_value) AS option_value
+			    , GROUP_CONCAT(IF(o.option_price_type = 'plus', o.option_price, CONCAT('-', o.option_price))) AS option_price
+				, GROUP_CONCAT(999) AS option_stock
+			FROM product_option_list AS o
+			where o.product_id = {$product_id}
+			GROUP BY o.option_name
+			ORDER BY seq ASC
+		";
 		return $this->db->query($sql);
 	}
 }

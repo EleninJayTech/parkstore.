@@ -11,38 +11,57 @@ class Product extends MY_Controller {
 	public function createExcel($shop='choitem') {
 		$this->load->model('Product_m');
 		$fileName = "{$shop}.xlsx";
-//		$employeeData = $this->Product_m->employeeList();
+		$productList = $this->Product_m->getProductList()->result_array();
 
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
 
 		$rows = 1;
-		foreach ($employeeData as $val){
+		foreach ($productList as $val){
 			// 상품상태 (신상품,중고상품)'
-			$sheet->setCellValue('A' . $rows, $val['test']);
+			$sheet->setCellValue('A' . $rows, '신상품');
 			// 카테고리ID'
-			$sheet->setCellValue('B' . $rows, $val['test']);
+			$sheet->setCellValue('B' . $rows, "{$val['B']}");
 			// 상품명'
-			$sheet->setCellValue('C' . $rows, $val['test']);
+			$sheet->setCellValue('C' . $rows, $val['C']);
 			// 판매가'
-			$sheet->setCellValue('D' . $rows, $val['test']);
+			$price = $val['D'];
+			if( empty($price) ){
+				$price_origin = $val['price_origin'];
+				$price_origin = Utility::numberOnly($price_origin);
+				$price = ((int) $price_origin * 0.035) + $price_origin;
+			}
+			$price = explode('/', $price);
+			$price = Utility::numberOnly($price[0]);
+			$sheet->setCellValue('D' . $rows, $price);
 			// 재고수량'
-			$sheet->setCellValue('E' . $rows, $val['test']);
+			$sheet->setCellValue('E' . $rows, 999);
 			// A/S 안내내용 (토요일 10:00 ~ 14:00 까지 응대가 가능하며 일요일은 쉽니다.)'
-			$sheet->setCellValue('F' . $rows, $val['test']);
+			$sheet->setCellValue('F' . $rows, 'A/S를 원하실 경우 판매자에게 연락 주시기 바랍니다. 단, 일부 품목의 경우 A/S가 불가능 할 수 있습니다.');
 			// A/S 전화번호 (02-0000-0000)'
-			$sheet->setCellValue('G' . $rows, $val['test']);
+			$sheet->setCellValue('G' . $rows, '010-4963-0515');
 			// 대표 이미지 파일명 (1.jpg)'
-			$sheet->setCellValue('H' . $rows, $val['test']);
+			$sheet->setCellValue('H' . $rows, $val['H']);
 			// 추가 이미지 파일명 (2.jpg,3.jpg)'
-			$sheet->setCellValue('I' . $rows, $val['test']);
+			$sheet->setCellValue('I' . $rows, $val['I']);
 			// 상품 상세정보 (<img src="http://bshop.phinf.naver.net/aaa.jpg">)'
-			$sheet->setCellValue('J' . $rows, $val['test']);
+			$productDetailHtml = $val['J'];
+			preg_match_all('/ec-data-src\s*=\s*"(.+?)"/',$productDetailHtml,$matches);
+			$detailList = '';
+			foreach ($matches as $imgSrc){
+				$imgSrc = str_replace('ec-data-src="', '', $imgSrc);
+				$imgSrc = str_replace('"', '', $imgSrc);
+				foreach ($imgSrc as $item) {
+					$link = "http://choitemb2b.com{$item}";
+					$detailList .= "<img src='{$link}'>";
+				}
+			}
+			$sheet->setCellValue('J' . $rows, $detailList);
 
-			// 판매자 상품코드 (초이템하나지정)'
-			$sheet->setCellValue('K' . $rows, $val['test']);
-			// 판매자 바코드'
-//			$sheet->setCellValue('L' . $rows, $val['test']);
+			// 판매자 상품코드
+			$sheet->setCellValue('K' . $rows, "{$val['K']}");
+			// 판매자 바코드' (초이템)'
+			$sheet->setCellValue('L' . $rows, '초이템');
 			// 제조사'
 //			$sheet->setCellValue('M' . $rows, $val['test']);
 			// 브랜드'
@@ -53,38 +72,43 @@ class Product extends MY_Controller {
 //			$sheet->setCellValue('P' . $rows, $val['test']);
 
 			// 부가세 (과세상품,면세상품,영세상품 )'
-			$sheet->setCellValue('Q' . $rows, $val['test']);
+			$sheet->setCellValue('Q' . $rows, '과세상품');
 			// 미성년자 구매 (Y,N)'
-			$sheet->setCellValue('R' . $rows, $val['test']);
+			$sheet->setCellValue('R' . $rows, 'Y');
 			// 구매평 노출여부 (Y,N)'
-			$sheet->setCellValue('S' . $rows, $val['test']);
+			$sheet->setCellValue('S' . $rows, 'Y');
 			// 원산지 코드 (9680)'
-			$sheet->setCellValue('T' . $rows, $val['test']);
+			$sheet->setCellValue('T' . $rows, "{$val['T']}");
 
 			// 수입사'
 //			$sheet->setCellValue('U' . $rows, $val['test']);
 
 			// 복수원산지 여부 (Y,N)'
-			$sheet->setCellValue('V' . $rows, $val['test']);
+			$sheet->setCellValue('V' . $rows, 'N');
 
 			// 원산지 직접입력'
-//			$sheet->setCellValue('W' . $rows, $val['test']);
+			$sheet->setCellValue('W' . $rows, $val['origin_area']);
 			// 배송방법'
-//			$sheet->setCellValue('X' . $rows, $val['test']);
-			// 배송비 유형'
-//			$sheet->setCellValue('Y' . $rows, $val['test']);
-			// 기본배송비'
-//			$sheet->setCellValue('Z' . $rows, $val['test']);
-			// 배송비 결제방식'
-//			$sheet->setCellValue('AA' . $rows, $val['test']);
+			$delivery = $val['X'];
+			$delivery = ($delivery == '택배' ? '택배‚ 소포‚ 등기' : '');
+			$sheet->setCellValue('X' . $rows, $delivery);
+			if( !empty($delivery) ){
+				$deliveryPrc = 2500;
+				// 배송비 유형
+				$sheet->setCellValue('Y' . $rows, '유료');
+				// 기본배송비
+				$sheet->setCellValue('Z' . $rows, $deliveryPrc);
+				// 배송비 결제방식
+				$sheet->setCellValue('AA' . $rows, '선결제');
+				// 반품배송비'
+				$sheet->setCellValue('AD' . $rows, $deliveryPrc);
+				// 교환배송비'
+				$sheet->setCellValue('AE' . $rows, $deliveryPrc);
+			}
 			// 조건부무료-상품판매가합계'
 //			$sheet->setCellValue('AB' . $rows, $val['test']);
 			// 수량별부과-수량'
 //			$sheet->setCellValue('AC' . $rows, $val['test']);
-			// 반품배송비'
-//			$sheet->setCellValue('AD' . $rows, $val['test']);
-			// 교환배송비'
-//			$sheet->setCellValue('AE' . $rows, $val['test']);
 			// 지역별 차등배송비 정보'
 //			$sheet->setCellValue('AF' . $rows, $val['test']);
 			// 별도설치비'
@@ -121,16 +145,36 @@ class Product extends MY_Controller {
 //			$sheet->setCellValue('AV' . $rows, $val['test']);
 			// 사은품'
 //			$sheet->setCellValue('AW' . $rows, $val['test']);
-			// 옵션형태'
-//			$sheet->setCellValue('AX' . $rows, $val['test']);
-			// 옵션명'
-//			$sheet->setCellValue('AY' . $rows, $val['test']);
-			// 옵션값'
-//			$sheet->setCellValue('AZ' . $rows, $val['test']);
-			// 옵션가'
-//			$sheet->setCellValue('BA' . $rows, $val['test']);
-			// 옵션 재고수량'
-//			$sheet->setCellValue('BB' . $rows, $val['test']);
+
+			$product_id = $val['product_id'];
+			$optionList = $this->Product_m->getOptionList($product_id)->result_array();
+			if( !empty($optionList) && count($optionList) > 0 ){
+				// 옵션형태 있으면 단독형
+				$sheet->setCellValue('AX' . $rows, '조합형');
+				$optionNameArr = [];
+				$option_value_arr = [];
+				$option_price_arr = [];
+				$option_stock_arr = [];
+				foreach ($optionList as $optionName){
+					$optionNameArr[] = $optionName['option_name'];
+					$option_value_arr[] = $optionName['option_value'];
+					$option_price_arr[] = $optionName['option_price'];
+					$option_stock_arr[] = $optionName['option_stock'];
+				}
+				// 옵션명'
+				$optionListStr = implode("\n", $optionNameArr);
+				$sheet->setCellValue('AY' . $rows, $optionListStr);
+				// 옵션값'
+				$option_value_str = implode("\n", $option_value_arr);
+				$sheet->setCellValue('AZ' . $rows, $option_value_str);
+				// 옵션가'
+				$option_price_str = implode("\n", $option_price_arr);
+				$sheet->setCellValue('BA' . $rows, $option_price_str);
+				// 옵션 재고수량'
+				$option_stock_str = implode("\n", $option_stock_arr);
+				$sheet->setCellValue('BB' . $rows, $option_stock_str);
+			}
+
 			// 추가상품명'
 //			$sheet->setCellValue('BC' . $rows, $val['test']);
 			// 추가상품값'
@@ -149,7 +193,7 @@ class Product extends MY_Controller {
 //			$sheet->setCellValue('BJ' . $rows, $val['test']);
 
 			// 스토어찜회원 전용여부 (Y,N)'
-			$sheet->setCellValue('BK' . $rows, $val['test']);
+			$sheet->setCellValue('BK' . $rows, 'N');
 
 			// 문화비 소득공제'
 //			$sheet->setCellValue('BL' . $rows, $val['test']);
@@ -158,7 +202,11 @@ class Product extends MY_Controller {
 			// 독립출판'
 //			$sheet->setCellValue('BN' . $rows, $val['test']);
 			$rows++;
+			if( $rows == 100 ){
+//				break;
+			}
 		}
+//		exit;
 		$writer = new Xlsx($spreadsheet);
 		$writer->save("upload/".$fileName);
 		header("Content-Type: application/vnd.ms-excel");
