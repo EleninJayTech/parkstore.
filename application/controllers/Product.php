@@ -173,6 +173,7 @@ class Product extends MY_Controller {
 				// 옵션값'
 				$option_value_str = implode("\n", $option_value_arr);
 				$option_value_str = str_replace('*', 'x', $option_value_str);
+				$option_value_str = preg_replace('/\([\+|\-].+\)/', '', $option_value_str);
 				$sheet->setCellValue('AZ' . $rows, $option_value_str);
 				// 옵션가'
 				$option_price_str = implode("\n", $option_price_arr);
@@ -209,7 +210,7 @@ class Product extends MY_Controller {
 			// 독립출판'
 //			$sheet->setCellValue('BN' . $rows, $val['test']);
 			$rows++;
-			if( $rows == 100 ){
+			if( $rows == 2 ){
 //				break;
 			}
 		}
