@@ -130,4 +130,12 @@ class Product_m extends MY_Model {
 		]);
 		return $this->db->insert_batch('detail_img', $saveData);
 	}
+
+	/**
+	 * @return CI_DB_result
+	 */
+	public function getProductList(){
+		$sql = "SELECT * FROM product";
+		return $this->db->query($sql);
+	}
 }
