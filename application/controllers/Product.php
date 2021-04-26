@@ -8,10 +8,11 @@ class Product extends MY_Controller {
 		parent::__construct();
 	}
 
-	public function createExcel($shop='choitem') {
+	public function createExcel($PK_CODE='') {
+		$shop='choitem';
 		$this->load->model('Product_m');
 		$fileName = "{$shop}.xlsx";
-		$productList = $this->Product_m->getProductList()->result_array();
+		$productList = $this->Product_m->getProductList($PK_CODE)->result_array();
 
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();

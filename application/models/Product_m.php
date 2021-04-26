@@ -142,9 +142,10 @@ class Product_m extends MY_Model {
 	}
 
 	/**
+	 * @param string $PK_CODE
 	 * @return CI_DB_result|bool|mixed|string
 	 */
-	public function getProductList(){
+	public function getProductList($PK_CODE=''){
 		$sql = "
 			SELECT
 			    p.product_id
@@ -162,6 +163,7 @@ class Product_m extends MY_Model {
 				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS origin_area
 				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '배송방법' ) AS X
 			FROM product AS p
+			WHERE p.pk_code = '{$PK_CODE}'
 		";
 		return $this->db->query($sql);
 	}
