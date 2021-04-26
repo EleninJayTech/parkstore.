@@ -31,6 +31,7 @@ class Product_m extends MY_Model {
 			'category_depth_2'=>$saveData['category_depth_2'],
 			'category_depth_3'=>$saveData['category_depth_3'],
 			'category_depth_4'=>$saveData['category_depth_4'],
+			'pk_code'=>$saveData['pk_code'],
 		];
 
 		if( empty($product_id) ){

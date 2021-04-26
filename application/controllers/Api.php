@@ -39,6 +39,8 @@ class Api extends MY_Controller {
 			$product_etc_info = $product['product_etc_info']; // 상품 기타 정보
 			$product_img = $product['product_img']; // 이미지 정보
 			$detail_img = $product['detail_img']; // 상세 이미지 정보
+			
+			$PK_CODE = $product['PK_CODE']; // 저장 시기 고유 번호
 
 			// 상품 기록
 			$product_id = $this->Product_m->saveProduct([
@@ -54,6 +56,7 @@ class Api extends MY_Controller {
 				'category_depth_2'=>$cate_depth_text[1] ?? '',
 				'category_depth_3'=>$cate_depth_text[2] ?? '',
 				'category_depth_4'=>$cate_depth_text[3] ?? '',
+				'pk_code'=>$PK_CODE,
 			]);
 
 			if( empty($product_id) ){
