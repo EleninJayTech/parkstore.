@@ -108,7 +108,8 @@ class Product extends MY_Controller {
 				// 반품배송비'
 				$sheet->setCellValue('AD' . $rows, $deliveryPrc);
 				// 교환배송비'
-				$sheet->setCellValue('AE' . $rows, $deliveryPrc);
+				$deliveryPrc_CROSS = $deliveryPrc * 2;
+				$sheet->setCellValue('AE' . $rows, $deliveryPrc_CROSS);
 			}
 			// 조건부무료-상품판매가합계'
 //			$sheet->setCellValue('AB' . $rows, $val['test']);
