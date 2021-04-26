@@ -133,6 +133,15 @@ class Product_m extends MY_Model {
 	}
 
 	/**
+	 * 존재하는 product_no
+	 * @return CI_DB_result|bool|mixed|string
+	 */
+	public function getProductExistList(){
+		$sql = " SELECT p.product_no FROM product AS p ";
+		return $this->db->query($sql);
+	}
+
+	/**
 	 * @return CI_DB_result|bool|mixed|string
 	 */
 	public function getProductList(){

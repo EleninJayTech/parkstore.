@@ -7,6 +7,18 @@ class Api extends MY_Controller {
 	}
 
 	/**
+	 * 존재 상품 리스트
+	 * @return CI_Output
+	 */
+	public function exist_pno(){
+		$this->load->model('Product_m');
+		$pnoList = $this->Product_m->getProductExistList()->result_array();
+		return $this->output
+			->set_content_type('application/json')
+			->set_output(json_encode($pnoList));
+	}
+
+	/**
 	 * 상품 데이터 저장
 	 * @param string $shop
 	 * @return CI_Output
