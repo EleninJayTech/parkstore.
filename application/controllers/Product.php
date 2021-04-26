@@ -25,14 +25,13 @@ class Product extends MY_Controller {
 			// 상품명'
 			$sheet->setCellValue('C' . $rows, $val['C']);
 			// 판매가'
-			$price = $val['D'];
-			if( empty($price) ){
-				$price_origin = $val['price_origin'];
-				$price_origin = Utility::numberOnly($price_origin);
-				$price = ((int) $price_origin * 0.035) + $price_origin;
-			}
+			$price = $val['D']; // 최저 판매 준수가
 			$price = explode('/', $price);
 			$price = Utility::numberOnly($price[0]);
+			$price_origin = $val['price_origin'];
+			$price_origin = Utility::numberOnly($price_origin);
+			$newPrice = ((int) $price_origin * 0.4) + $price_origin; // 공급가에서 판매가 계산
+			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
 			$sheet->setCellValue('D' . $rows, $price);
 			// 재고수량'
 			$sheet->setCellValue('E' . $rows, 999);
