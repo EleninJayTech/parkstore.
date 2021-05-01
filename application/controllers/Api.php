@@ -284,8 +284,8 @@ class Api extends MY_Controller {
 			$keyword = urldecode($keyword);
 		}
 		$dataList = $this->naversearchadapi->relKwdStat($keyword);
-		echo "<pre>";
-		print_r($dataList);
-		echo "</pre>";
+		$this->load->view('/naver_search_api', [
+			'dataList'=>$dataList,
+		]);
 	}
 }
