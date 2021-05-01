@@ -276,16 +276,24 @@ class Api extends MY_Controller {
 			->set_output(json_encode(['message'=>$message,'status'=>$status,]));
 	}
 
-	public function naver($keyword=''){
-		$this->load->library('NaverSearchAdApi');
-		if( empty($keyword) ){
-			$keyword = $this->input->get('keyword', true) ?? '손목보호대';
-		} else {
-			$keyword = urldecode($keyword);
+	public function naver(){
+		$keyword = $this->input->get('keyword');
+		$cacheName = urlencode($keyword);
+		$this->load->driver('cache', array('adapter' => 'file'));
+		if ( ! $dataList = $this->cache->get($cacheName)){
+			$this->load->library('NaverSearchAdApi');
+			if( empty($keyword) ){
+				$keyword = $this->input->get('keyword', true) ?? '손목보호대';
+			} else {
+				$keyword = urldecode($keyword);
+			}
+			$dataList = $this->naversearchadapi->relKwdStat($keyword);
+			$this->cache->save($cacheName, $dataList, 3600);
 		}
-		$dataList = $this->naversearchadapi->relKwdStat($keyword);
+
 		$this->load->view('/naver_search_api', [
 			'dataList'=>$dataList,
+			'keyword'=>$keyword,
 		]);
 	}
 }

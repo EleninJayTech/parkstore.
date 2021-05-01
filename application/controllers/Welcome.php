@@ -20,6 +20,7 @@ class Welcome extends CI_Controller {
 	 */
 	public function index()
 	{
+		redirect('/api/naver');
 		$this->load->view('welcome_message');
 	}
 }

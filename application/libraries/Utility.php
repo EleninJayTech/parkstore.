@@ -26,7 +26,7 @@ class Utility{
 				$assoc = true;
 			}
 			if( $md5decode == true ){
-				$cacheParams = Util::md5decode($cacheParams);
+				$cacheParams = self::md5decode($cacheParams);
 			}
 			$return = json_decode($cacheParams, $assoc);
 		}
@@ -187,7 +187,7 @@ class Utility{
 //		$cryptKey = 'leHGf13Bi4CD2jF5p15D4qx';
 //		$qEncoded = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($cryptKey), $q, MCRYPT_MODE_CBC, md5(md5($cryptKey))));
 
-		$qEncoded = openssl_encrypt($q, "aes-128-cbc", Util::$cryptPass, true, Util::$cryptIv);
+		$qEncoded = openssl_encrypt($q, "aes-128-cbc", self::$cryptPass, true, self::$cryptIv);
 		$qEncoded = base64_encode($qEncoded);
 
 		return $qEncoded;
@@ -205,7 +205,7 @@ class Utility{
 //		$qDecoded = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($cryptKey), base64_decode($q), MCRYPT_MODE_CBC, md5(md5($cryptKey))), "\0");
 
 		$data = base64_decode($q);
-		$qDecoded = openssl_decrypt($data, "aes-128-cbc", Util::$cryptPass, true, Util::$cryptIv);
+		$qDecoded = openssl_decrypt($data, "aes-128-cbc", self::$cryptPass, true, self::$cryptIv);
 		return ($qDecoded);
 	}
 
@@ -646,7 +646,7 @@ class Utility{
 	 */
 	public static function setReturnUrl(){
 		$returnUrlInfo = '/' . uri_string();
-		$queryString = Util::getQueryString();
+		$queryString = self::getQueryString();
 		if( trim($queryString) != '' ){
 			$returnUrlInfo = $returnUrlInfo . '?' . $queryString;
 		}
@@ -669,19 +669,19 @@ class Utility{
 	 * @return bool
 	 */
 	public static function setCache($cacheName, $cacheData, $cacheTime=43200, $cacheDescription=''){
-		if( Util::$existCacheDir == false ){
+		if( self::$existCacheDir == false ){
 			$dirPath = Ci::app()->config->config['cache_path'];
 			if (!is_dir($dirPath)) {
 				mkdir($dirPath, 0700, true);
 			}
-			Util::$existCacheDir = true;
+			self::$existCacheDir = true;
 		}
 
 		$cacheData = json_encode($cacheData);
-		$cacheData = Util::md5encode($cacheData);
+		$cacheData = self::md5encode($cacheData);
 
 		// 캐시 목록에 추가
-		Util::addCacheList($cacheName, $cacheDescription);
+		self::addCacheList($cacheName, $cacheDescription);
 
 		Ci::app()->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
 		return Ci::app()->cache->save($cacheName, $cacheData, $cacheTime);
@@ -700,13 +700,13 @@ class Utility{
 	 * @return mixed
 	 */
 	public static function getCache($cacheName, $assoc=false){
-		if( empty(Util::$cacheData[$cacheName]) ){
+		if( empty(self::$cacheData[$cacheName]) ){
 			Ci::app()->load->driver('cache', array('adapter' => 'memcached', 'backup' => 'file'));
-			Util::$cacheData[$cacheName] = Ci::app()->cache->get($cacheName);
+			self::$cacheData[$cacheName] = Ci::app()->cache->get($cacheName);
 		}
 
-		$cacheData = Util::$cacheData[$cacheName];
-		$cacheData = Util::md5decode($cacheData);
+		$cacheData = self::$cacheData[$cacheName];
+		$cacheData = self::md5decode($cacheData);
 		$cacheData = json_decode($cacheData, $assoc);
 
 		return $cacheData;
@@ -730,7 +730,7 @@ class Utility{
 	 */
 	public static function addCacheList($cacheName, $cacheDescription=''){
 		$cacheParams = Params::$_CACHE_LIST_PATH;
-		$objectCacheData = Util::getJsonFileData($cacheParams, 'array', true);
+		$objectCacheData = self::getJsonFileData($cacheParams, 'array', true);
 		if( empty($objectCacheData) || !is_array($objectCacheData) ){
 			$objectCacheData = array();
 		}
@@ -741,7 +741,7 @@ class Utility{
 
 		// json 형태로 변경후
 		$objectCacheData = json_encode($objectCacheData);
-		$objectCacheData = Util::md5encode($objectCacheData);
+		$objectCacheData = self::md5encode($objectCacheData);
 
 		// 파일로 재 저장
 		fwrite($fp, $objectCacheData);
