@@ -16,7 +16,7 @@
 </head>
 <body>
 	<div style="width: 100%; padding: 20px;">
-		<form action="./" method="get">
+		<form action="/api/naver" method="get">
 			<input type="text" placeholder="키워드" name="keyword" value="<?=$keyword?>">
 			<input type="submit" value="조회">
 		</form>
@@ -34,11 +34,13 @@
 			foreach ($dataList['keywordList'] as $list){
 				$monthlyPcQcCnt = $list['monthlyPcQcCnt'];
 				$monthlyPcQcCnt = ($monthlyPcQcCnt == '< 10' ? 1 : $monthlyPcQcCnt);
+				$monthlyMobileQcCnt = $list['monthlyMobileQcCnt'];
+				$monthlyMobileQcCnt = ($monthlyMobileQcCnt == '< 10' ? 1 : $monthlyMobileQcCnt);
 				echo "
 					<tr>
 						<td>{$list['relKeyword']}</td>
 						<td>{$monthlyPcQcCnt}</td>
-						<td>{$list['monthlyMobileQcCnt']}</td>
+						<td>{$monthlyMobileQcCnt}</td>
 					</tr>
 				";
 			}
@@ -52,18 +54,26 @@
 	jQuery(function($){
 		$('[name="keyword"]').focus();
 		$('#keywordList').DataTable({
-			"order": [[ 1, "desc" ]]
+			"order": [[ 2, "desc" ]]
 			, "initComplete": function () {
 				// var api = this.api();
-				var showKeyList = [];
-				$("#keywordList > tbody > tr > td:nth-child(1)").each(function(){
-					var keyword = $(this).text();
-					showKeyList.push(keyword);
-				});
-				$("#topKeywordList").val(showKeyList.join());
+				showKeyList();
 			}
 		});
+
+		$('#keywordList').on('click', 'tr', function () {
+			showKeyList();
+		});
 	});
+
+	function showKeyList(){
+		var showKeyList = [];
+		$("#keywordList > tbody > tr > td:nth-child(1)").each(function(){
+			var keyword = $(this).text();
+			showKeyList.push(keyword);
+		});
+		$("#topKeywordList").val(showKeyList.join());
+	}
 </script>
 </body>
 </html>

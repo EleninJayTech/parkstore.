@@ -278,6 +278,7 @@ class Api extends MY_Controller {
 
 	public function naver(){
 		$keyword = $this->input->get('keyword');
+		$keyword = preg_replace("/\s+/", "", $keyword);
 		$cacheName = urlencode($keyword);
 		$this->load->driver('cache', array('adapter' => 'file'));
 		if ( ! $dataList = $this->cache->get($cacheName)){
