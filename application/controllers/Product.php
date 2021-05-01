@@ -33,6 +33,8 @@ class Product extends MY_Controller {
 			$price_origin = Utility::numberOnly($price_origin);
 			$newPrice = ((int) $price_origin * 0.4) + $price_origin; // 공급가에서 판매가 계산
 			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
+			// 100 단위 내림
+			$price = ((int) ($price / 100)) * 100;
 			$sheet->setCellValue('D' . $rows, $price);
 			// 재고수량'
 			$sheet->setCellValue('E' . $rows, 999);
