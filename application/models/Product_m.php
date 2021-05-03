@@ -150,6 +150,7 @@ class Product_m extends MY_Model {
 			SELECT
 			    p.product_id
 			    , p.product_no
+				, p.product_link
 			    , '신상품' as A
 			    , p.category_code AS B
 			    , p.product_name AS C

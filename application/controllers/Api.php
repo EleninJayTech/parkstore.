@@ -276,6 +276,36 @@ class Api extends MY_Controller {
 			->set_output(json_encode(['message'=>$message,'status'=>$status,]));
 	}
 
+	public function detail_img($PK_CODE){
+		$encrypt_key = $this->input->post('encrypt_key');
+
+		$return = [];
+		$this->load->model('Product_m');
+		$this->db->trans_begin();
+		try{
+			if( $encrypt_key !== 'e8b6a94f577bd529c2e67da6aa449219' ){
+				throw new Exception("ERR");
+			}
+
+			$targetList = $this->Product_m->getProductList($PK_CODE)->result_array();
+			foreach ($targetList as $target){
+				$return[$target['product_no']] = $target['product_link'];
+			}
+			$message = '';
+			$status = 200;
+			$this->db->trans_commit();
+		} catch (Exception $e){
+			$message = $e->getMessage();
+			$status = 0;
+			$this->db->trans_rollback();
+		}
+
+		return $this->output
+			->set_content_type('application/json')
+			->set_status_header($status) // Return status
+			->set_output(json_encode($return));
+	}
+
 	public function naver(){
 		$keyword = $this->input->get('keyword');
 		$keyword = preg_replace("/\s+/", "", $keyword);
