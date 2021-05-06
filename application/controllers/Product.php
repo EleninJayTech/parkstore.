@@ -102,6 +102,10 @@ class Product extends MY_Controller {
 			$sheet->setCellValue('X' . $rows, $delivery);
 			if( !empty($delivery) ){
 				$deliveryPrc = 2500;
+				// WH 상품 3천원
+				if( preg_match('/^WH/', $val['K']) ){
+					$deliveryPrc = 3000;
+				}
 				// 배송비 유형
 				$sheet->setCellValue('Y' . $rows, '유료');
 				// 기본배송비
