@@ -134,10 +134,19 @@ class Product_m extends MY_Model {
 
 	/**
 	 * 존재하는 product_no
+	 * @param string $shop_code
 	 * @return CI_DB_result|bool|mixed|string
 	 */
-	public function getProductExistList(){
-		$sql = " SELECT p.product_no FROM product AS p ";
+	public function getProductExistList($shop_code=''){
+		switch ($shop_code){
+			case 'goodsdeco':$shopCode = 'goodsdeco';break;
+			default:$shopCode = 'choitem';break;
+		}
+		$sql = "
+			SELECT p.product_no 
+			FROM product AS p
+			WHERE p.shop_code = '{$shopCode}'
+        ";
 		return $this->db->query($sql);
 	}
 
@@ -145,27 +154,53 @@ class Product_m extends MY_Model {
 	 * @param string $PK_CODE
 	 * @return CI_DB_result|bool|mixed|string
 	 */
-	public function getProductList($PK_CODE=''){
-		$sql = "
-			SELECT
-			    p.product_id
-			    , p.product_no
-				, p.product_link
-			    , '신상품' as A
-			    , p.category_code AS B
-			    , p.product_name AS C
-			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '공급가' ) AS price_origin
-			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '최저 판매 준수가' ) AS D
-			    , (SELECT img_file_name FROM product_img AS pi WHERE pi.product_id = p.product_id ORDER BY seq ASC LIMIT 1) AS H
-			    , (SELECT GROUP_CONCAT(img_file_name) FROM product_img AS pi WHERE pi.product_id = p.product_id AND seq != 1 ORDER BY seq ASC) AS I
-			    , p.product_detail_info_html AS J
-			    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '자체상품코드' ) AS K
-			    , (SELECT IF(pil.info_value = '국내', '00', '0200037') FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS T
-				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS origin_area
-				, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '배송방법' ) AS X
-			FROM product AS p
-			WHERE p.pk_code = '{$PK_CODE}'
-		";
+	public function getProductList($PK_CODE='', $shop_code=''){
+		switch ($shop_code){
+			case 'goodsdeco':
+				$sql = "
+					SELECT
+					    p.product_id
+					    , p.product_no
+						, p.product_link
+					    , '신상품' as A
+					    , p.category_code AS B
+					    , p.product_name AS C
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '판매가' ) AS price_origin
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '판매가' ) AS D
+					    , (SELECT img_file_name FROM product_img AS pi WHERE pi.product_id = p.product_id ORDER BY seq ASC LIMIT 1) AS H
+					    , (SELECT GROUP_CONCAT(img_file_name) FROM product_img AS pi WHERE pi.product_id = p.product_id AND seq != 1 ORDER BY seq ASC) AS I
+					    , p.product_detail_info_html AS J
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '상품코드' ) AS K
+					    , (SELECT IF(pil.info_value = '국내', '00', '0200037') FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '원산지' ) AS T
+						, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '원산지' ) AS origin_area
+						, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '배송비' ) AS X
+					FROM product AS p
+					WHERE p.pk_code = '{$PK_CODE}'
+				";
+				break;
+			default:
+				$sql = "
+					SELECT
+					    p.product_id
+					    , p.product_no
+						, p.product_link
+					    , '신상품' as A
+					    , p.category_code AS B
+					    , p.product_name AS C
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '공급가' ) AS price_origin
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '최저 판매 준수가' ) AS D
+					    , (SELECT img_file_name FROM product_img AS pi WHERE pi.product_id = p.product_id ORDER BY seq ASC LIMIT 1) AS H
+					    , (SELECT GROUP_CONCAT(img_file_name) FROM product_img AS pi WHERE pi.product_id = p.product_id AND seq != 1 ORDER BY seq ASC) AS I
+					    , p.product_detail_info_html AS J
+					    , (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '자체상품코드' ) AS K
+					    , (SELECT IF(pil.info_value = '국내', '00', '0200037') FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS T
+						, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '제조국' ) AS origin_area
+						, (SELECT pil.info_value FROM product_info_list AS pil WHERE pil.product_id = p.product_id AND pil.info_name = '배송방법' ) AS X
+					FROM product AS p
+					WHERE p.pk_code = '{$PK_CODE}'
+				";
+				break;
+		}
 		return $this->db->query($sql);
 	}
 

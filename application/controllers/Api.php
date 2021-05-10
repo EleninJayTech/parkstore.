@@ -8,11 +8,12 @@ class Api extends MY_Controller {
 
 	/**
 	 * 존재 상품 리스트
+	 * @param string $shop_code
 	 * @return CI_Output
 	 */
-	public function exist_pno(){
+	public function exist_pno($shop_code=''){
 		$this->load->model('Product_m');
-		$pnoList = $this->Product_m->getProductExistList()->result_array();
+		$pnoList = $this->Product_m->getProductExistList($shop_code)->result_array();
 		return $this->output
 			->set_content_type('application/json')
 			->set_output(json_encode($pnoList));
@@ -23,7 +24,7 @@ class Api extends MY_Controller {
 	 * @param string $shop
 	 * @return CI_Output
 	 */
-	public function product_save($shop='chitem'){
+	public function product_save(){
 		$encrypt_key = $this->input->post('encrypt_key');
 		$product = $this->input->post('product');
 
@@ -48,7 +49,7 @@ class Api extends MY_Controller {
 
 			$product_info_list = $product['product_info_list']; // 상품 정보
 			$product_option_list = $product['product_option_list']; // 옵션 정보
-			$product_etc_info = $product['product_etc_info']; // 상품 기타 정보
+			$product_etc_info = $product['product_etc_info'] ?? []; // 상품 기타 정보
 			$product_img = $product['product_img']; // 이미지 정보
 			$detail_img = $product['detail_img']; // 상세 이미지 정보
 			
@@ -108,6 +109,10 @@ class Api extends MY_Controller {
 			$optionPass = [
 				'-------------------',
 				'- [필수] 옵션을 선택해 주세요 -',
+				'=
+옵션
+ : 가격
+                                        =',
 			];
 			// 상품 옵션 기록
 			if( !empty($product_option_list) && is_array($product_option_list) ){
@@ -124,11 +129,19 @@ class Api extends MY_Controller {
 					}
 
 					// 옵션가 확인후 저장
-					$checkOption = preg_match('/\(\+|\(\-/', $option_value);
+					if( $shop_code == 'goodsdeco' ){
+						$checkOption = preg_match('/[\+|\-].+원/', $option_value);
+					} else {
+						$checkOption = preg_match('/\(\+|\(\-/', $option_value);
+					}
 					$option_price = 0;
 					$option_price_type = 'plus';
 					if( !empty($checkOption) ){ // 옵션가 존재시 분석
-						preg_match('/\([\+|\-].+\)/', $option_value, $optionPrice);
+						if( $shop_code == 'goodsdeco' ){
+							preg_match('/[\+|\-].+원/', $option_value, $optionPrice);
+						} else {
+							preg_match('/\([\+|\-].+\)/', $option_value, $optionPrice);
+						}
 						$_op = $optionPrice[0];
 						$option_price = Utility::numberOnly($_op); // 옵션가 숫자 금액만 저장
 

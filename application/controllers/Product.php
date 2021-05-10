@@ -8,11 +8,10 @@ class Product extends MY_Controller {
 		parent::__construct();
 	}
 
-	public function createExcel($PK_CODE='') {
-		$shop='choitem';
+	public function createExcel($PK_CODE='', $shop_code='choitem') {
 		$this->load->model('Product_m');
-		$fileName = "{$shop}.xlsx";
-		$productList = $this->Product_m->getProductList($PK_CODE)->result_array();
+		$fileName = "{$shop_code}.xlsx";
+		$productList = $this->Product_m->getProductList($PK_CODE, $shop_code)->result_array();
 
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
@@ -31,7 +30,7 @@ class Product extends MY_Controller {
 			$price = Utility::numberOnly($price[0]);
 			$price_origin = $val['price_origin'];
 			$price_origin = Utility::numberOnly($price_origin);
-			$newPrice = ((int) $price_origin * 0.4) + $price_origin; // 공급가에서 판매가 계산
+			$newPrice = ((int) $price_origin * 0.45) + $price_origin; // 공급가에서 판매가 계산
 			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
 			// 100 단위 내림
 			$price = ((int) ($price / 100)) * 100;
@@ -48,9 +47,11 @@ class Product extends MY_Controller {
 			$sheet->setCellValue('I' . $rows, $val['I']);
 			// 상품 상세정보 (<img src="http://bshop.phinf.naver.net/aaa.jpg">)'
 			$productDetailHtml = $val['J'];
-			$productDetailHtml = str_replace('ec-data-src', 'ec-data-img', $productDetailHtml);
-			$productDetailHtml = str_replace('src=', 'ori-src=', $productDetailHtml);
-			$productDetailHtml = str_replace('ec-data-img="', 'src="http://choitemb2b.com', $productDetailHtml);
+			if( $shop_code=='choitem' ){
+				$productDetailHtml = str_replace('ec-data-src', 'ec-data-img', $productDetailHtml);
+				$productDetailHtml = str_replace('src=', 'ori-src=', $productDetailHtml);
+				$productDetailHtml = str_replace('ec-data-img="', 'src="http://choitemb2b.com', $productDetailHtml);
+			}
 			/*
 			preg_match_all('/ec-data-src\s*=\s*"(.+?)"/',$productDetailHtml,$matches);
 			$detailList = '';
@@ -65,10 +66,20 @@ class Product extends MY_Controller {
 			*/
 			$sheet->setCellValue('J' . $rows, $productDetailHtml);
 
+			switch ($shop_code){
+				case 'goodsdeco':
+					$col_L = '굿즈데코';
+					$pre_K = 'GDC';
+					break;
+				default:
+					$col_L = '초이템';
+					$pre_K = 'CHO_';
+					break;
+			}
 			// 판매자 상품코드
-			$sheet->setCellValue('K' . $rows, "CHO_{$val['K']}");
+			$sheet->setCellValue('K' . $rows, "{$pre_K}{$val['K']}");
 			// 판매자 바코드' (초이템)'
-			$sheet->setCellValue('L' . $rows, '초이템');
+			$sheet->setCellValue('L' . $rows, $col_L);
 			// 제조사'
 //			$sheet->setCellValue('M' . $rows, $val['test']);
 			// 브랜드'
@@ -98,7 +109,8 @@ class Product extends MY_Controller {
 			$sheet->setCellValue('W' . $rows, $val['origin_area']);
 			// 배송방법'
 			$delivery = $val['X'];
-			$delivery = ($delivery == '택배' ? '택배‚ 소포‚ 등기' : '');
+			$col_X_number_only = Utility::numberOnly($val['X']);
+			$delivery = ($delivery == '택배' || preg_match('/택배/', $delivery) ? '택배‚ 소포‚ 등기' : '');
 			$sheet->setCellValue('X' . $rows, $delivery);
 			if( !empty($delivery) ){
 				$deliveryPrc = 2500;
@@ -106,6 +118,15 @@ class Product extends MY_Controller {
 				if( preg_match('/^WH/', $val['K']) ){
 					$deliveryPrc = 3000;
 				}
+
+				if( $shop_code == 'goodsdeco' ){
+					if( $col_X_number_only > 0 ){
+						$deliveryPrc = $col_X_number_only;
+					} else {
+						$deliveryPrc = 3000;
+					}
+				}
+
 				// 배송비 유형
 				$sheet->setCellValue('Y' . $rows, '유료');
 				// 기본배송비
