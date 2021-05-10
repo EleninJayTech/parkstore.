@@ -258,37 +258,6 @@ class Api extends MY_Controller {
 			->set_output(json_encode(['message'=>$message,'status'=>$status,]));
 	}
 
-	/**
-	 * 상품 엑셀 추출
-	 * @param string $shop
-	 * @return CI_Output
-	 */
-	public function export_excel($shop='chitem'){
-		$encrypt_key = $this->input->post('encrypt_key');
-		$product = $this->input->post('product');
-
-		$this->load->model('Product_m');
-		$this->db->trans_begin();
-		try{
-			if( $encrypt_key !== 'e8b6a94f577bd529c2e67da6aa449219' ){
-				throw new Exception("ERR");
-			}
-
-			$message = '';
-			$status = 200;
-			$this->db->trans_commit();
-		} catch (Exception $e){
-			$message = $e->getMessage();
-			$status = 0;
-			$this->db->trans_rollback();
-		}
-
-		return $this->output
-			->set_content_type('application/json')
-			->set_status_header($status) // Return status
-			->set_output(json_encode(['message'=>$message,'status'=>$status,]));
-	}
-
 	public function detail_img($PK_CODE){
 		$encrypt_key = $this->input->post('encrypt_key');
 
