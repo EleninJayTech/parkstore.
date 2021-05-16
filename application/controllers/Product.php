@@ -30,7 +30,7 @@ class Product extends MY_Controller {
 			$price = Utility::numberOnly($price[0]);
 			$price_origin = $val['price_origin'];
 			$price_origin = Utility::numberOnly($price_origin);
-			$newPrice = ((int) $price_origin * 0.45) + $price_origin; // 공급가에서 판매가 계산
+			$newPrice = ((int) $price_origin * 0.5) + $price_origin; // 공급가에서 판매가 계산
 			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
 			// 100 단위 내림
 			$price = ((int) ($price / 100)) * 100;
