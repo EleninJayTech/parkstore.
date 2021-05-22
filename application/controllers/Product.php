@@ -65,8 +65,11 @@ class Product extends MY_Controller {
 			}
 			// 수수료 더하고 마진 더하고
 			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin));
-			// 100 단위 내림
-			$newPrice = ((int) ($newPrice / 100)) * 100; // 최종 원하는 판매가
+			// 나갈 적립금 더해서 금액 만들기
+			// 기본 적립금 1% 리뷰적립 50원 사진리뷰 150원
+			$newPrice = $newPrice + (int) ($price_origin * 0.01) + 50 + 150;
+			// 10 단위 내림
+			$newPrice = ((int) ($newPrice / 10)) * 10; // 최종 원하는 판매가
 			$price = ($newPrice < $min_price ? $min_price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
 
 			// 할인가를 만들기 위한 할인 전 가격 추출
@@ -173,7 +176,10 @@ class Product extends MY_Controller {
 			// 판매자 특이사항'
 //			$sheet->setCellValue('AH' . $rows, $val['test']);
 			// 즉시할인 값'
-			$sale_amount = $up_price - $price; // 할인가 구하기
+			$sale_amount = 0;
+			if( $up_price > $price ){
+				$sale_amount = $up_price - $price; // 할인가 구하기
+			}
 			$sheet->setCellValue('AI' . $rows, $sale_amount);
 			// 즉시할인 단위'
 			$sheet->setCellValue('AJ' . $rows, '원');
