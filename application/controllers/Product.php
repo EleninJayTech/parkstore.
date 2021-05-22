@@ -42,29 +42,39 @@ class Product extends MY_Controller {
 				}
 			}
 			// 판매가'
-			$price = $val['D']; // 최저 판매 준수가
-			$price = explode('/', $price);
-			$price = Utility::numberOnly($price[0]);
+			$min_price = $val['D']; // 최저 판매 준수가
+			$min_price = explode('/', $min_price);
+			$min_price = Utility::numberOnly($min_price[0]);
 			$price_origin = $val['price_origin'];
 			$price_origin = Utility::numberOnly($price_origin);
 			// 최대 수수료 상품만 2% + 전체 금액 3.85% 14700
 			$fees = ($price_origin * 0.02) + (($price_origin + $deliveryPrc) * 0.0385); // 최대 수수료
 			// 금액 별 마진 계산
 			if( $price_origin < 10000 ){
-				$margin = 0.5;
+				$up_margin = 0.7; // 할인가 구하기 위한 업 마진
+				$margin = 0.5; // 실제 마진
 			} else if( $price_origin < 50000 ){
+				$up_margin = 0.65;
 				$margin = 0.45;
 			} else if( $price_origin < 100000 ){
+				$up_margin = 0.6;
 				$margin = 0.4;
 			} else {
+				$up_margin = 0.55;
 				$margin = 0.35;
 			}
-//			$newPrice = ((int) $price_origin * 0.5) + $price_origin; // 공급가에서 판매가 계산
-			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin)); // 수수료 더하고 마진 더하고
-			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
+			// 수수료 더하고 마진 더하고
+			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin));
 			// 100 단위 내림
-			$price = ((int) ($price / 100)) * 100;
-			$sheet->setCellValue('D' . $rows, $price);
+			$newPrice = ((int) ($newPrice / 100)) * 100; // 최종 원하는 판매가
+			$price = ($newPrice < $min_price ? $min_price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
+
+			// 할인가를 만들기 위한 할인 전 가격 추출
+			$up_price = $price_origin + (int) ($price_origin * $up_margin); // 할인 전 가격
+			$up_price = ((int) ($up_price / 100)) * 100; // 최종 원하는 판매가 100 단위 내림
+			$up_price = ($up_price < $min_price ? $min_price : $up_price); // 계산된 판매가가 최저판매 준수가 보다 작으면
+
+			$sheet->setCellValue('D' . $rows, $up_price);
 			// 재고수량'
 			$sheet->setCellValue('E' . $rows, 999);
 			// A/S 안내내용 (토요일 10:00 ~ 14:00 까지 응대가 가능하며 일요일은 쉽니다.)'
@@ -163,9 +173,10 @@ class Product extends MY_Controller {
 			// 판매자 특이사항'
 //			$sheet->setCellValue('AH' . $rows, $val['test']);
 			// 즉시할인 값'
-//			$sheet->setCellValue('AI' . $rows, $val['test']);
+			$sale_amount = $up_price - $price; // 할인가 구하기
+			$sheet->setCellValue('AI' . $rows, $sale_amount);
 			// 즉시할인 단위'
-//			$sheet->setCellValue('AJ' . $rows, $val['test']);
+			$sheet->setCellValue('AJ' . $rows, '원');
 			// 복수구매할인 조건 값'
 //			$sheet->setCellValue('AK' . $rows, $val['test']);
 			// 복수구매할인 조건 단위'
