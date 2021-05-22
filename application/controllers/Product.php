@@ -24,13 +24,43 @@ class Product extends MY_Controller {
 			$sheet->setCellValue('B' . $rows, "{$val['B']}");
 			// 상품명'
 			$sheet->setCellValue('C' . $rows, $val['C']);
+			// 배송비 계산
+			$delivery = $val['X'];
+			$col_X_number_only = Utility::numberOnly($val['X']);
+			$delivery = ($delivery == '택배' || preg_match('/택배/', $delivery) ? '택배‚ 소포‚ 등기' : '');
+			$deliveryPrc = 2500;
+			// WH 상품 3천원
+			if( preg_match('/^WH/', $val['K']) ){
+				$deliveryPrc = 3000;
+			}
+
+			if( $shop_code == 'goodsdeco' ){
+				if( $col_X_number_only > 0 ){
+					$deliveryPrc = $col_X_number_only;
+				} else {
+					$deliveryPrc = 3000;
+				}
+			}
 			// 판매가'
 			$price = $val['D']; // 최저 판매 준수가
 			$price = explode('/', $price);
 			$price = Utility::numberOnly($price[0]);
 			$price_origin = $val['price_origin'];
 			$price_origin = Utility::numberOnly($price_origin);
-			$newPrice = ((int) $price_origin * 0.5) + $price_origin; // 공급가에서 판매가 계산
+			// 최대 수수료 상품만 2% + 전체 금액 3.85% 14700
+			$fees = ($price_origin * 0.02) + (($price_origin + $deliveryPrc) * 0.0385); // 최대 수수료
+			// 금액 별 마진 계산
+			if( $price_origin < 10000 ){
+				$margin = 0.5;
+			} else if( $price_origin < 50000 ){
+				$margin = 0.45;
+			} else if( $price_origin < 100000 ){
+				$margin = 0.4;
+			} else {
+				$margin = 0.35;
+			}
+//			$newPrice = ((int) $price_origin * 0.5) + $price_origin; // 공급가에서 판매가 계산
+			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin)); // 수수료 더하고 마진 더하고
 			$price = ($newPrice < $price ? $price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
 			// 100 단위 내림
 			$price = ((int) ($price / 100)) * 100;
@@ -108,25 +138,8 @@ class Product extends MY_Controller {
 			// 원산지 직접입력'
 			$sheet->setCellValue('W' . $rows, $val['origin_area']);
 			// 배송방법'
-			$delivery = $val['X'];
-			$col_X_number_only = Utility::numberOnly($val['X']);
-			$delivery = ($delivery == '택배' || preg_match('/택배/', $delivery) ? '택배‚ 소포‚ 등기' : '');
 			$sheet->setCellValue('X' . $rows, $delivery);
 			if( !empty($delivery) ){
-				$deliveryPrc = 2500;
-				// WH 상품 3천원
-				if( preg_match('/^WH/', $val['K']) ){
-					$deliveryPrc = 3000;
-				}
-
-				if( $shop_code == 'goodsdeco' ){
-					if( $col_X_number_only > 0 ){
-						$deliveryPrc = $col_X_number_only;
-					} else {
-						$deliveryPrc = 3000;
-					}
-				}
-
 				// 배송비 유형
 				$sheet->setCellValue('Y' . $rows, '유료');
 				// 기본배송비
