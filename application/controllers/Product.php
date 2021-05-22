@@ -222,7 +222,10 @@ class Product extends MY_Controller {
 				foreach ($optionList as $optionName){
 					$optionNameArr[] = $optionName['option_name'];
 					$option_value_arr[] = $optionName['option_value'];
-					$option_price_arr[] = $optionName['option_price'];
+					$_option_price = Utility::numberOnly($optionName['option_price']);
+					$_option_price = (int) ($_option_price * $margin);
+					$_option_price = ($_option_price / 10) * 10; // 최종 원하는 판매가
+					$option_price_arr[] = $_option_price;
 					$option_stock_arr[] = $optionName['option_stock'];
 				}
 				// 옵션명'
