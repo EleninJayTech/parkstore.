@@ -55,16 +55,16 @@ class Product extends MY_Controller {
 			// 금액 별 마진 계산
 			if( $price_origin < 10000 ){
 				$up_margin = [0.4, 0.42, 0.44, 0.46, 0.48, 0.5]; // 할인가 구하기 위한 업 마진
-				$margin = 0.1; // 실제 마진
+				$margin = 0.45; // 실제 마진
 			} else if( $price_origin < 50000 ){
 				$up_margin = [0.3, 0.32, 0.34, 0.36, 0.38, 0.4];
-				$margin = 0.09;
+				$margin = 0.3;
 			} else if( $price_origin < 100000 ){
 				$up_margin = [0.2, 0.22, 0.24, 0.26, 0.28, 0.3];
-				$margin = 0.08;
+				$margin = 0.25;
 			} else {
 				$up_margin = [0.1, 0.12, 0.14, 0.16, 0.18, 0.2];
-				$margin = 0.07;
+				$margin = 0.15;
 			}
 
 			if( is_array($up_margin) ){
@@ -72,19 +72,31 @@ class Product extends MY_Controller {
 				$up_margin = $up_margin[0];
 			}
 
-			// 수수료 더하고 마진 더하고
-			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin));
-			// 나갈 적립금 더해서 금액 만들기
-			// 기본 적립금 1% 리뷰적립 50원 사진리뷰 150원
-			$newPrice = $newPrice + (int) ($price_origin * 0.01) + 50 + 150;
-			// 10 단위 내림
-			$newPrice = ((int) ($newPrice / 10)) * 10; // 최종 원하는 판매가
-			$price = ($newPrice < $min_price ? $min_price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
+			// 최저 판매 준수가 존재시
+			if( $min_price > 0 ){
+				$up_price = $min_price + (int) ($min_price * $up_margin); // 할인 전 가격
+				$up_price = ((int) ($up_price / 100)) * 100; // 최종 원하는 판매가 100 단위 내림
+				$price = $min_price;
+			} else {
+				// 수수료 더하고 마진 더하고
+				$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin));
+				// 나갈 적립금 더해서 금액 만들기
+				// 기본 적립금 1% 리뷰적립 50원 사진리뷰 150원
+				$newPrice = $newPrice + (int) ($price_origin * 0.01) + 50 + 150;
+				// 10 단위 내림
+				$newPrice = ((int) ($newPrice / 10)) * 10; // 최종 원하는 판매가
+//				$price = ($newPrice < $min_price ? $min_price : $newPrice); // 계산된 판매가가 최저판매 준수가 보다 작으면
+				$price = $newPrice; // 계산된 판매가가 최저판매 준수가 보다 작으면
 
-			// 할인가를 만들기 위한 할인 전 가격 추출
-			$up_price = $price_origin + (int) ($price_origin * $up_margin); // 할인 전 가격
-			$up_price = ((int) ($up_price / 100)) * 100; // 최종 원하는 판매가 100 단위 내림
-			$up_price = ($up_price < $min_price ? $min_price : $up_price); // 계산된 판매가가 최저판매 준수가 보다 작으면
+				// 할인가를 만들기 위한 할인 전 가격 추출
+				$up_price = $price_origin + (int) ($price_origin * $up_margin); // 할인 전 가격
+				$up_price = ((int) ($up_price / 100)) * 100; // 최종 원하는 판매가 100 단위 내림
+				// 계산된 판매가가 최저판매 준수가 보다 작으면
+//				if( $up_price < $min_price ){
+//					$up_price = $min_price + (int) ($min_price * $up_margin); // 할인 전 가격
+//					$up_price = ((int) ($up_price / 100)) * 100; // 최종 원하는 판매가 100 단위 내림
+//				}
+			}
 
 			$sheet->setCellValue('D' . $rows, $up_price);
 			// 재고수량'
