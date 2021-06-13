@@ -33,6 +33,9 @@ class Product extends MY_Controller {
 			if( preg_match('/^WH/', $val['K']) ){
 				$deliveryPrc = 3000;
 			}
+			if( preg_match('/^EP/', $val['K']) ){
+				$deliveryPrc = 3000;
+			}
 
 			if( $shop_code == 'goodsdeco' ){
 				if( $col_X_number_only > 0 ){
@@ -51,18 +54,24 @@ class Product extends MY_Controller {
 			$fees = ($price_origin * 0.02) + (($price_origin + $deliveryPrc) * 0.0385); // 최대 수수료
 			// 금액 별 마진 계산
 			if( $price_origin < 10000 ){
-				$up_margin = 0.7; // 할인가 구하기 위한 업 마진
-				$margin = 0.5; // 실제 마진
+				$up_margin = [0.4, 0.42, 0.44, 0.46, 0.48, 0.5]; // 할인가 구하기 위한 업 마진
+				$margin = 0.1; // 실제 마진
 			} else if( $price_origin < 50000 ){
-				$up_margin = 0.65;
-				$margin = 0.45;
+				$up_margin = [0.3, 0.32, 0.34, 0.36, 0.38, 0.4];
+				$margin = 0.09;
 			} else if( $price_origin < 100000 ){
-				$up_margin = 0.6;
-				$margin = 0.4;
+				$up_margin = [0.2, 0.22, 0.24, 0.26, 0.28, 0.3];
+				$margin = 0.08;
 			} else {
-				$up_margin = 0.55;
-				$margin = 0.35;
+				$up_margin = [0.1, 0.12, 0.14, 0.16, 0.18, 0.2];
+				$margin = 0.07;
 			}
+
+			if( is_array($up_margin) ){
+				shuffle($up_margin);
+				$up_margin = $up_margin[0];
+			}
+
 			// 수수료 더하고 마진 더하고
 			$newPrice = (int) (($price_origin + $fees) + ($price_origin * $margin));
 			// 나갈 적립금 더해서 금액 만들기
