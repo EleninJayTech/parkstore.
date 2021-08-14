@@ -6,6 +6,67 @@ class Api extends MY_Controller {
 		parent::__construct();
 	}
 
+	public function thre(){
+
+	}
+
+	public function test_multi(){
+		$startTime = microtime(true);
+		// 동시 실행 프로세스 수
+		$maxProcCount = $this->getCpuCount();
+
+		// 실행할 전체 job 카운트
+		$countJob = 100;
+		// 임시로 실행할 job 할당
+		$jobList = array();
+		for ($i = 0; $i < $countJob; $i++) {
+			$jobList[] = array('name' => 'job' . $i, 'sleep_time' => floor((mt_rand() / mt_getrandmax()) * 1000) * 1000);
+		}
+		// 일단 동시 실행 프로세스 수만큼 fork
+		for ($i = 0; $i < $maxProcCount; $i++) {
+			$arg = array_shift($jobList);
+			$this->calculate($arg);
+		}
+		// child process가 죽을 때마다 체크해서 계속 job 할당
+
+		while (pcntl_waitpid(0, $status) != -1) {
+			//$status = pcntl_wexitstatus($status);
+			// 처리할 job이 전부 소진되었을 경우 그냥 기다림
+			if (count($jobList) < 1) continue;
+			// job 할당
+			$arg = array_shift($jobList);
+			$this->calculate($arg);
+		}
+		// 계산완료
+		printf("계산완료 (%.3f sec)\n", microtime(true) - $startTime);
+	}
+
+	// 처리할 job 데이터를 넘겨받아 child process fork해서 단위계산 수행
+	public function calculate($arg)
+	{
+		$pid = pcntl_fork();
+		// error
+		if ($pid == -1) {
+			echo '[ERROR] could not fork' . "\n";
+			exit;
+		} // child
+		else if ($pid == 0) {
+			// 단위계산 수행
+			echo 'JOB ' . $arg['name'] . ' START' . "\n";
+			usleep($arg['sleep_time']);
+			echo 'JOB ' . $arg['name'] . ' COMPLETE' . "\n";
+			exit;
+		} // parent
+		else {
+		}
+	}
+
+	// CPU 프로세서 수 반환
+	public function getCpuCount()
+	{
+		return substr_count(file_get_contents('/proc/cpuinfo'), 'processor');
+	}
+
 	/**
 	 * 존재 상품 리스트
 	 * @param string $shop_code

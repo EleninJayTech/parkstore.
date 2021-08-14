@@ -298,8 +298,8 @@ class Product extends MY_Controller {
 		}
 //		exit;
 		$writer = new Xlsx($spreadsheet);
-		$writer->save("upload/".$fileName);
+		$writer->save("_data/upload/".$fileName);
 		header("Content-Type: application/vnd.ms-excel");
-		redirect(base_url()."/upload/".$fileName);
+		redirect(base_url()."/_data/upload/".$fileName);
 	}
 }
