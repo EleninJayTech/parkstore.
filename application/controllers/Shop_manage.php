@@ -40,4 +40,34 @@ class Shop_manage extends MY_Controller {
 			'change_code'=>$change_code,
 		]);
 	}
+
+	public function product($type='form'){
+	    if( $type == 'upload' ){
+	        $this->product_upload();
+	        exit;
+        }
+
+        $this->load->view('product_save_form', [
+
+        ]);
+    }
+
+    public function product_upload(){
+        $config['upload_path']          = FCPATH . '_data/upload';
+//        $config['allowed_types']        = 'csv|xls|xlsx';
+//        $config['max_size']             = 1000000;
+//        $config['max_width']            = 10240;
+//        $config['max_height']           = 768;
+
+        $this->load->library('upload', $config);
+
+        if( !$this->upload->do_upload("upload_file") ){
+            echo 'ERROR!!';
+            exit;
+        }
+
+        $fileInfo = $this->upload->data();
+
+        var_dump($fileInfo);
+    }
 }
